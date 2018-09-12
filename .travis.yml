@@ -4,8 +4,7 @@ language: generic
 
 env:
   global:
-  - GOSS_VERSION=0.3.5
-  - GOSS_PATH=/usr/local/bin/goss
+  - images=( awscli )
 
 services:
   - docker
@@ -14,9 +13,14 @@ before_install:
     - curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec 
 
 script:
-  - docker build -t rahulinux/awscli .
-  - docker run --name awscli -dt rahulinux/awscli sh
-  - inspec exec test-awscli.rb docker://awscli
+  - CHANGED_FILES=($(git diff --name-only $TRAVIS_COMMIT_RANGE))
+  - echo ${CHANGED_FILES[@]}
+  - for image in ${images[@]}
+    do 
+      docker build -t rahulinux/$image -t Dockerfile.$image .
+      docker run --name $image -dt rahulinux/$image sh
+      inspec exec test-$image.rb docker://$image
+    done
   
 
 after_success:
