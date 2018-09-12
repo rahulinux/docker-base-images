@@ -13,7 +13,7 @@ before_install:
     - curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec 
 
 script:
-    -  docker build -t rahulinux/$image -t Dockerfile.$image .
+    -  docker build -t rahulinux/$image -f Dockerfile.$image .
     -  docker run --name $image -dt rahulinux/$image sh
     -  inspec exec test-$image.rb docker://$image
   
