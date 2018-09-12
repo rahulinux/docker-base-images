@@ -4,7 +4,7 @@ language: generic
 
 env:
   global:
-  - images=( awscli )
+  - image=awscli 
 
 services:
   - docker
@@ -13,19 +13,14 @@ before_install:
     - curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec 
 
 script:
-  - CHANGED_FILES=($(git diff --name-only $TRAVIS_COMMIT_RANGE))
-  - echo ${CHANGED_FILES[@]}
-  - for image in ${images[@]}
-    do 
-      docker build -t rahulinux/$image -t Dockerfile.$image .
-      docker run --name $image -dt rahulinux/$image sh
-      inspec exec test-$image.rb docker://$image
-    done
+    -  docker build -t rahulinux/$image -t Dockerfile.$image .
+    -  docker run --name $image -dt rahulinux/$image sh
+    -  inspec exec test-$image.rb docker://$image
   
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]
     then
        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-       docker push rahulinux/awscli
+       docker push rahulinux/$image
     fi
